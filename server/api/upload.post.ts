@@ -1,12 +1,11 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { extname, join, relative } from 'node:path'
+import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { extname, join, relative, resolve } from 'node:path'
 import { readMultipartFormData } from 'h3'
 import { loadDotEnv } from '../utils/env'
 import { parseImagesWithGemini } from '../utils/gemini'
 import { mergeBooth, readBooths } from '../utils/catalog'
 import { inputDir, outputCsvPath, outputJsonPath, reviewedCsvPath, reviewedJsonPath } from '../utils/paths'
 import { writeOutputs } from '../utils/exporter'
-import { findBoothImages } from '../utils/images'
 
 const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 const mimeExtensions: Record<string, string> = {
@@ -29,18 +28,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'No upload data received' })
   }
 
-  const boothId = sanitizeBoothId(String(form.find(part => part.name === 'boothId')?.data || ''))
-  if (!boothId) {
-    throw createError({ statusCode: 400, statusMessage: 'Booth ID is required' })
-  }
-
   const files = form.filter(part => part.name === 'images' && part.filename && part.data?.length)
   if (!files.length) {
     throw createError({ statusCode: 400, statusMessage: 'At least one image is required' })
   }
 
-  const boothDir = join(inputDir, boothId)
-  mkdirSync(boothDir, { recursive: true })
+  const uploadId = `UPLOAD_${Date.now()}`
+  const tempDir = join(inputDir, '_pending', uploadId)
+  mkdirSync(tempDir, { recursive: true })
 
   const saved = files.map((file, index) => {
     const extension = resolveExtension(file.filename || '', file.type || '')
@@ -49,14 +44,27 @@ export default defineEventHandler(async (event) => {
     }
 
     const filename = `${Date.now()}-${index + 1}${extension}`
-    const path = join(boothDir, filename)
+    const path = join(tempDir, filename)
     writeFileSync(path, file.data)
-    return relative(process.cwd(), path)
+    return path
   })
 
-  const imagePaths = findBoothImages(boothDir)
-  const sourcePath = imagePaths.map(path => relative(process.cwd(), path)).join(';')
-  const booth = await parseImagesWithGemini(imagePaths, boothId, sourcePath, apiKey, model)
+  const tempSourcePath = saved.map(path => relative(process.cwd(), path)).join(';')
+  const booth = await parseImagesWithGemini(saved, uploadId, tempSourcePath, apiKey, model)
+  const boothId = sanitizeBoothId(booth.booth_id) || uploadId
+  booth.booth_id = boothId
+
+  const boothDir = join(inputDir, boothId)
+  mkdirSync(boothDir, { recursive: true })
+
+  const finalPaths = saved.map((path, index) => {
+    const finalPath = join(boothDir, `${Date.now()}-${index + 1}${extname(path).toLowerCase()}`)
+    renameSync(path, finalPath)
+    return finalPath
+  })
+  cleanupPendingDir(tempDir)
+
+  booth.source_path = finalPaths.map(path => relative(process.cwd(), path)).join(';')
 
   const rawBooths = mergeBooth(readBooths(outputJsonPath), booth)
   writeOutputs(rawBooths, outputJsonPath, outputCsvPath)
@@ -69,7 +77,7 @@ export default defineEventHandler(async (event) => {
   return {
     ok: true,
     booth_id: boothId,
-    files: saved,
+    files: finalPaths.map(path => relative(process.cwd(), path)),
     parsed: {
       items: booth.items.length,
       needs_review: booth.needs_review,
@@ -88,4 +96,12 @@ function resolveExtension (filename: string, mimeType: string) {
   const extension = extname(filename).toLowerCase()
   if (imageExtensions.has(extension)) return extension
   return mimeExtensions[mimeType] || ''
+}
+
+function cleanupPendingDir (tempDir: string) {
+  const pendingRoot = resolve(inputDir, '_pending')
+  const resolved = resolve(tempDir)
+  if (resolved.startsWith(pendingRoot) && existsSync(resolved)) {
+    rmSync(resolved, { recursive: true, force: true })
+  }
 }

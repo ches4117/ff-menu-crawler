@@ -47,10 +47,10 @@ http://127.0.0.1:4178
    - 如果 reviewed 檔不存在或看起來像亂碼，改讀 `outputs/ff_items.json`
 
 2. 上傳圖片：
-   - 輸入攤位號
    - 選擇一張或多張圖片
-   - 按「上傳」
-   - 檔案會存到 `work/input/<攤位號>/`
+   - 按「上傳並解析」
+   - Gemini 會從圖片辨識攤位號
+   - 檔案會存到 `work/input/<辨識出的攤位號>/`
    - 上傳後會自動解析該攤位
    - 如果輸出裡已經有同攤位，會用新解析結果更新該攤位商品
    - 不會檢查是否重複上傳同一張圖片
@@ -65,6 +65,7 @@ http://127.0.0.1:4178
    - 修改攤位名稱、日期、社團名
    - 修改商品名稱、分類、價格、年齡分級、格式、備註
    - 新增或刪除商品
+   - 可移除目前攤位的已上傳圖片與輸出資料
 
 5. 按「儲存審核結果」：
    - 輸出 `outputs/ff_items.reviewed.json`
@@ -75,6 +76,7 @@ http://127.0.0.1:4178
 - `app/pages/index.vue`: Vue 審核介面
 - `server/api/process.post.ts`: Gemini 圖片解析 API
 - `server/api/upload.post.ts`: 圖片上傳 API
+- `server/api/booth/[boothId].delete.ts`: 移除已上傳攤位 API
 - `server/api/data.get.ts`: 讀取目前資料
 - `server/api/save.post.ts`: 儲存 reviewed 結果
 - `server/api/source.get.ts`: 顯示原始圖片

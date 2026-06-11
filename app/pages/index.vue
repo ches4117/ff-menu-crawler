@@ -9,8 +9,8 @@ const active = ref(0)
 const pending = ref(false)
 const savePending = ref(false)
 const uploadPending = ref(false)
-const uploadBoothId = ref('')
 const uploadInput = ref<HTMLInputElement | null>(null)
+const removePending = ref(false)
 const status = ref('載入中...')
 const statusKind = ref('')
 
@@ -62,8 +62,8 @@ async function saveReviewed () {
 
 async function uploadImages () {
   const files = uploadInput.value?.files
-  if (!uploadBoothId.value.trim() || !files?.length) {
-    status.value = '請輸入攤位號並選擇圖片'
+  if (!files?.length) {
+    status.value = '請選擇圖片'
     statusKind.value = 'warn'
     return
   }
@@ -73,7 +73,6 @@ async function uploadImages () {
   statusKind.value = ''
   try {
     const form = new FormData()
-    form.append('boothId', uploadBoothId.value)
     Array.from(files).forEach(file => form.append('images', file))
 
     const result = await $fetch<{ booth_id: string, files: string[], parsed: { items: number, cost: number } }>('/api/upload', {
@@ -81,7 +80,6 @@ async function uploadImages () {
       body: form
     })
 
-    uploadBoothId.value = result.booth_id
     if (uploadInput.value) uploadInput.value.value = ''
     await loadData()
     const boothIndex = booths.value.findIndex(booth => booth.booth_id === result.booth_id)
@@ -93,6 +91,26 @@ async function uploadImages () {
     statusKind.value = 'warn'
   } finally {
     uploadPending.value = false
+  }
+}
+
+async function removeActiveBooth () {
+  if (!activeBooth.value) return
+  const boothId = activeBooth.value.booth_id
+  removePending.value = true
+  status.value = `移除 ${boothId} 中...`
+  statusKind.value = ''
+  try {
+    await $fetch(`/api/booth/${encodeURIComponent(boothId)}`, { method: 'DELETE' })
+    await loadData()
+    active.value = Math.min(active.value, Math.max(booths.value.length - 1, 0))
+    status.value = `已移除 ${boothId}`
+    statusKind.value = 'ok'
+  } catch (error: any) {
+    status.value = error?.data?.statusMessage || error?.message || '移除失敗'
+    statusKind.value = 'warn'
+  } finally {
+    removePending.value = false
   }
 }
 
@@ -145,13 +163,10 @@ function updateItemPrice (item: BoothItem, value: string) {
       <aside class="booth-list">
         <form class="upload-panel" @submit.prevent="uploadImages">
           <div class="panel-title">上傳圖片</div>
-          <label>攤位號
-            <input v-model="uploadBoothId" placeholder="例如 O12" autocomplete="off">
-          </label>
           <label>圖片
             <input ref="uploadInput" type="file" accept="image/jpeg,image/png,image/webp" multiple>
           </label>
-          <button class="primary" :disabled="uploadPending" type="submit">上傳</button>
+          <button class="primary" :disabled="uploadPending" type="submit">上傳並解析</button>
         </form>
 
         <button
@@ -178,6 +193,9 @@ function updateItemPrice (item: BoothItem, value: string) {
       <section v-if="activeBooth" class="editor-pane">
         <div class="panel">
           <div class="panel-title">攤位資料</div>
+          <div class="panel-actions">
+            <button :disabled="removePending" @click="removeActiveBooth">移除已上傳</button>
+          </div>
           <div class="form-grid">
             <label>活動<input v-model="activeBooth.event_name"></label>
             <label>攤位<input v-model="activeBooth.booth_id"></label>
@@ -252,6 +270,7 @@ p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
 .editor-pane { max-height: calc(100vh - 64px); overflow: auto; padding: 16px; }
 .panel { margin-bottom: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
 .panel-title { margin-bottom: 10px; font-size: 14px; font-weight: 650; }
+.panel-actions { display: flex; justify-content: flex-end; margin: -4px 0 10px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 label { display: grid; gap: 4px; color: var(--muted); font-size: 12px; }
 .full { margin-top: 10px; }

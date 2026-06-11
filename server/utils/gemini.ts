@@ -25,7 +25,7 @@ const imageMimes: Record<string, string> = {
 
 export async function parseImagesWithGemini (imagePaths: string[], boothId: string, sourcePath: string, apiKey: string, model: string): Promise<BoothCatalog> {
   const parts: any[] = [{
-    text: `${systemPrompt}\n\n預設活動：FF\n預設攤位號：${boothId}\n來源檔案：${sourcePath}\n\n請閱讀接下來的品書圖片。多張圖片屬於同一攤位時，請合併成同一份商品清單。`
+    text: `${systemPrompt}\n\n預設活動：FF\n預設攤位號：${boothId}\n來源檔案：${sourcePath}\n\n請閱讀接下來的品書圖片。多張圖片屬於同一攤位時，請合併成同一份商品清單。若圖片中看得到攤位號，booth_id 必須使用圖片中的攤位號；只有完全看不到攤位號時，才使用預設攤位號。`
   }]
 
   for (const path of imagePaths) {
