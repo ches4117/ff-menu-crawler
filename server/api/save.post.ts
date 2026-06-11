@@ -1,6 +1,7 @@
 import type { BoothCatalog } from '../../shared/types'
 import { reviewedCsvPath, reviewedJsonPath } from '../utils/paths'
 import { writeOutputs } from '../utils/exporter'
+import { normalizeBoothList } from '../utils/catalog'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ booths?: BoothCatalog[] }>(event)
@@ -8,7 +9,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Expected booths array' })
   }
 
-  writeOutputs(body.booths, reviewedJsonPath, reviewedCsvPath)
+  writeOutputs(normalizeBoothList(body.booths), reviewedJsonPath, reviewedCsvPath)
   return {
     ok: true,
     outputs: {

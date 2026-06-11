@@ -75,16 +75,20 @@ async function uploadImages () {
     const form = new FormData()
     Array.from(files).forEach(file => form.append('images', file))
 
-    const result = await $fetch<{ booth_id: string, files: string[], parsed: { items: number, cost: number } }>('/api/upload', {
+    const result = await $fetch<{
+      booth_ids: string[]
+      files: string[]
+      parsed: { booths: number, items: number, cost: number }
+    }>('/api/upload', {
       method: 'POST',
       body: form
     })
 
     if (uploadInput.value) uploadInput.value.value = ''
     await loadData()
-    const boothIndex = booths.value.findIndex(booth => booth.booth_id === result.booth_id)
+    const boothIndex = booths.value.findIndex(booth => booth.booth_id === result.booth_ids[0])
     if (boothIndex >= 0) active.value = boothIndex
-    status.value = `已上傳 ${result.files.length} 張並解析 ${result.parsed.items} 個商品，估算 US$${result.parsed.cost.toFixed(8)}`
+    status.value = `已上傳 ${result.files.length} 張，解析 ${result.parsed.booths} 攤、${result.parsed.items} 商品，估算 US$${result.parsed.cost.toFixed(8)}`
     statusKind.value = 'ok'
   } catch (error: any) {
     status.value = error?.data?.statusMessage || error?.message || '上傳失敗'
@@ -178,7 +182,7 @@ function updateItemPrice (item: BoothItem, value: string) {
         >
           <span>
             <strong>{{ booth.booth_id }}</strong>
-            <small>{{ booth.circle_name }} · {{ booth.items.length }} items</small>
+            <small>{{ booth.day || '未標日期' }} · {{ booth.items.length }} items</small>
           </span>
           <span class="badge" :class="{ warn: booth.needs_review }">
             {{ booth.needs_review ? 'review' : 'ok' }}
@@ -198,7 +202,7 @@ function updateItemPrice (item: BoothItem, value: string) {
           </div>
           <div class="form-grid">
             <label>活動<input v-model="activeBooth.event_name"></label>
-            <label>攤位<input v-model="activeBooth.booth_id"></label>
+            <label>ID<input v-model="activeBooth.booth_id"></label>
             <label>社團<input v-model="activeBooth.circle_name"></label>
             <label>日期<input v-model="activeBooth.day"></label>
             <label>信心<input v-model.number="activeBooth.confidence" type="number" min="0" max="1" step="0.01"></label>

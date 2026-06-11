@@ -1,11 +1,13 @@
 import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { extname, join, relative, resolve } from 'node:path'
 import { readMultipartFormData } from 'h3'
+import type { BoothCatalog } from '../../shared/types'
 import { loadDotEnv } from '../utils/env'
 import { parseImagesWithGemini } from '../utils/gemini'
-import { mergeBooth, readBooths } from '../utils/catalog'
+import { combineBooths, mergeBooth, readBooths } from '../utils/catalog'
 import { inputDir, outputCsvPath, outputJsonPath, reviewedCsvPath, reviewedJsonPath } from '../utils/paths'
 import { writeOutputs } from '../utils/exporter'
+import { circleCatalogId, safeStorageId } from '../utils/circleId'
 
 const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 const mimeExtensions: Record<string, string> = {
@@ -49,48 +51,63 @@ export default defineEventHandler(async (event) => {
     return path
   })
 
-  const tempSourcePath = saved.map(path => relative(process.cwd(), path)).join(';')
-  const booth = await parseImagesWithGemini(saved, uploadId, tempSourcePath, apiKey, model)
-  const boothId = sanitizeBoothId(booth.booth_id) || uploadId
-  booth.booth_id = boothId
+  const parsedByBooth = new Map<string, BoothCatalog>()
+  const finalPathsByBooth = new Map<string, string[]>()
 
-  const boothDir = join(inputDir, boothId)
-  mkdirSync(boothDir, { recursive: true })
+  for (const [index, path] of saved.entries()) {
+    const fallbackBoothId = `${uploadId}_${index + 1}`
+    const tempSourcePath = relative(process.cwd(), path)
+    const parsed = await parseImagesWithGemini([path], fallbackBoothId, tempSourcePath, apiKey, model)
+    const boothId = circleCatalogId(parsed.circle_name, parsed.booth_id || fallbackBoothId) || fallbackBoothId
+    parsed.booth_id = boothId
 
-  const finalPaths = saved.map((path, index) => {
+    const boothDir = join(inputDir, safeStorageId(boothId))
+    mkdirSync(boothDir, { recursive: true })
+
     const finalPath = join(boothDir, `${Date.now()}-${index + 1}${extname(path).toLowerCase()}`)
     renameSync(path, finalPath)
-    return finalPath
-  })
+
+    const relativeFinalPath = relative(process.cwd(), finalPath)
+    parsed.source_path = relativeFinalPath
+    finalPathsByBooth.set(boothId, [...(finalPathsByBooth.get(boothId) || []), relativeFinalPath])
+
+    const current = parsedByBooth.get(boothId)
+    parsedByBooth.set(boothId, current ? combineBooths(current, parsed) : parsed)
+  }
+
   cleanupPendingDir(tempDir)
 
-  booth.source_path = finalPaths.map(path => relative(process.cwd(), path)).join(';')
+  const parsedBooths = [...parsedByBooth.values()].map(booth => ({
+    ...booth,
+    source_path: (finalPathsByBooth.get(booth.booth_id) || []).join(';')
+  }))
 
-  const rawBooths = mergeBooth(readBooths(outputJsonPath), booth)
+  let rawBooths = readBooths(outputJsonPath)
+  for (const booth of parsedBooths) {
+    rawBooths = mergeBooth(rawBooths, booth)
+  }
   writeOutputs(rawBooths, outputJsonPath, outputCsvPath)
 
   if (existsSync(reviewedJsonPath)) {
-    const reviewedBooths = mergeBooth(readBooths(reviewedJsonPath), booth)
+    let reviewedBooths = readBooths(reviewedJsonPath)
+    for (const booth of parsedBooths) {
+      reviewedBooths = mergeBooth(reviewedBooths, booth)
+    }
     writeOutputs(reviewedBooths, reviewedJsonPath, reviewedCsvPath)
   }
 
   return {
     ok: true,
-    booth_id: boothId,
-    files: finalPaths.map(path => relative(process.cwd(), path)),
+    booth_ids: parsedBooths.map(booth => booth.booth_id),
+    files: [...finalPathsByBooth.values()].flat(),
     parsed: {
-      items: booth.items.length,
-      needs_review: booth.needs_review,
-      review_reasons: booth.review_reasons,
-      cost: booth.cost_estimate?.estimated_total_cost_usd || 0
+      booths: parsedBooths.length,
+      items: parsedBooths.reduce((sum, booth) => sum + booth.items.length, 0),
+      cost: parsedBooths.reduce((sum, booth) => sum + (booth.cost_estimate?.estimated_total_cost_usd || 0), 0)
     },
-    booth
+    booths: parsedBooths
   }
 })
-
-function sanitizeBoothId (value: string) {
-  return value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '')
-}
 
 function resolveExtension (filename: string, mimeType: string) {
   const extension = extname(filename).toLowerCase()
