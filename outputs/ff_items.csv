@@ -1,0 +1,33 @@
+﻿event_name,booth_id,circle_name,day,title,item_type,fandom,price_twd,age_rating,format,notes,needs_review,review_reasons,confidence,input_tokens,output_tokens,total_tokens,estimated_total_cost_usd,estimated_cost_per_image_usd,source_path
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",PORTRAITS OF ZERO,新刊,絕區零,250,全年齡,B5/24P 畫冊,封面燙金,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",絕區零明信片 (單款),周邊,絕區零,30,全年齡,明信片 (10.5*14.8CM),單款,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",絕區零明信片 (一組),周邊,絕區零,100,全年齡,明信片 (10.5*14.8CM),一組,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",雅 泳裝立牌,周邊,絕區零,350,全年齡,立牌 (高度18CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",蒼角 泳裝立牌,周邊,絕區零,350,全年齡,立牌 (高度18CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",蒼角 串串吊飾,周邊,絕區零,150,全年齡,吊飾 (5*5.5CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",薇薇安安 串串吊飾,周邊,絕區零,150,全年齡,吊飾 (5.3*6CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",休息時刻 雅 滑鼠墊,周邊,絕區零,600,全年齡,滑鼠墊 (30*60CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",雅 金屬徽章,周邊,絕區零,200,全年齡,金屬徽章 (5CM),耳朵可旋轉,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",妖刀無尾 金屬徽章,周邊,絕區零,200,全年齡,金屬徽章 (5CM),未知,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",哈密瓜好好吃到會阿斯顏 追嘖飯友,周邊,絕區零,200,全年齡,飯友 (5.5CM*4.5CM),雙面不同圖,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,C25 C26 / C27 C28,鬍渣大叔,"Day1, Day2",來都來了我都要大套組,套組,絕區零,1800,全年齡,套組,包含以上所有商品，買大套組有四趴機率抽到四十公分大立牌，單筆滿額贈送仿舊風水洗帆布斜挎包,false,,0.95,1378,3812,5190,0.012125,0.012125,work\input\C25\1781143161670-1.jpg
+FF45,O12,Cilentz,Day 1/2,新刊漫畫 「愚者自將」,新刊,蔚藍檔案,200,R18,B5/黑白/24P,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,雜魚教授雙面吊飾,周邊,蔚藍檔案,150,全年齡,7x7cm,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,炫光卡書籤,周邊,蔚藍檔案,50,全年齡,15x6cm,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,手提資料夾,周邊,蔚藍檔案,100,全年齡,未知,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,明信片,周邊,蔚藍檔案,,全年齡,未知,購買任一商品皆贈送,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,新刊SET,套組,蔚藍檔案,400,R18,未知,包含：新刊漫畫、雜魚教授雙面吊飾、炫光卡書籤、手提資料夾、明信片,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,大滑鼠墊 (Item A),周邊,蔚藍檔案,600,全年齡,30x60cm,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,小滑鼠墊 (Item B),周邊,蔚藍檔案,300,全年齡,25x30cm,單品價格,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,SET A,套組,蔚藍檔案,900,R18,未知,包含：新刊漫畫、雜魚教授雙面吊飾、炫光卡書籤、手提資料夾、大滑鼠墊,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,SET B,套組,蔚藍檔案,600,R18,未知,包含：新刊漫畫、雜魚教授雙面吊飾、炫光卡書籤、手提資料夾、小滑鼠墊,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,掛軸,周邊,蔚藍檔案,700,全年齡,60x90cm,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,雙面立牌,周邊,蔚藍檔案,200,全年齡,15cm,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,既刊,既刊,蔚藍檔案,200,未知,未知,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,既刊SET,套組,蔚藍檔案,400,未知,未知,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,兔子洞教授吊飾,周邊,蔚藍檔案,150,全年齡,未知,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,O12,Cilentz,Day 1/2,明信片透卡組,周邊,蔚藍檔案,100,全年齡,未知,未知,true,明信片 缺少價格,0.95,1459,3450,4909,0.0110795,0.0110795,work\input\O12\4826a9af7b347e4ff0f0f7b25ca4843dd3ae10d1afcab32b60bd0a45d6827dbf.jpg
+FF45,U05,未知,"DAY1, DAY3",【My GO!!!!. Ave Mujica合本】隨筆插畫本,新刊,MyGO!!!!! x Ave Mujica,200,未知,B5 / 18P 全彩,MyGO!!!!! x Ave Mujica vol. 1 ラクガキ本,true,社團名稱未知,0.9,1461,2035,3496,0.0068355,0.0068355,work\input\U05\9812aa0bd97806be0dc722f099212f42a1450db36bfff8dfa53e91d7b3e15ae3.webp
+FF45,U05,未知,"DAY1, DAY3",壓克力吊飾 ① 初華大型犬 版,周邊,MyGO!!!!!,150,全年齡,壓克力吊飾,,true,社團名稱未知,0.9,1461,2035,3496,0.0068355,0.0068355,work\input\U05\9812aa0bd97806be0dc722f099212f42a1450db36bfff8dfa53e91d7b3e15ae3.webp
+FF45,U05,未知,"DAY1, DAY3",壓克力吊飾 ② Tomorin 版,周邊,MyGO!!!!!,150,全年齡,壓克力吊飾,,true,社團名稱未知,0.9,1461,2035,3496,0.0068355,0.0068355,work\input\U05\9812aa0bd97806be0dc722f099212f42a1450db36bfff8dfa53e91d7b3e15ae3.webp
+FF45,U05,未知,"DAY1, DAY3",本+吊飾(1+2)合購,套組,MyGO!!!!! x Ave Mujica,450,未知,套組,包含【My GO!!!!. Ave Mujica合本】隨筆插畫本及兩款壓克力吊飾,true,社團名稱未知,0.9,1461,2035,3496,0.0068355,0.0068355,work\input\U05\9812aa0bd97806be0dc722f099212f42a1450db36bfff8dfa53e91d7b3e15ae3.webp

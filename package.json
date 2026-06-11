@@ -1,0 +1,19 @@
+{
+  "name": "ff-ai-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 127.0.0.1 --port 4177",
+    "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxt/schema": "^4.1.3",
+    "nuxt": "^4.1.3",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
