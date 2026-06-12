@@ -85,10 +85,19 @@ GEMINI_API_KEY=你的 Gemini API key
 GEMINI_MODEL=gemini-3-flash-preview
 ```
 
-2. 執行 bat：
+2. 啟動服務：
+
+Windows：
 
 ```powershell
 .\run_nuxt.bat
+```
+
+macOS / Linux：
+
+```bash
+chmod +x ./run_nuxt.sh
+./run_nuxt.sh
 ```
 
 3. 開啟瀏覽器：
@@ -97,7 +106,7 @@ GEMINI_MODEL=gemini-3-flash-preview
 http://127.0.0.1:4178
 ```
 
-`run_nuxt.bat` 會自動：
+啟動腳本會自動：
 
 - 安裝缺少的 `node_modules`
 - 執行 `npm run build`
