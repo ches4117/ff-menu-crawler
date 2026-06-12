@@ -1,7 +1,7 @@
 import type { BoothCatalog, BoothItem } from '../../shared/types'
 
-export const itemTypes = ['新刊', '既刊', '周邊', '套組', '委託', '未知'] as const
-export const ageRatings = ['全年齡', 'R18', '未知'] as const
+export const itemTypes = ['新刊', '既刊', '周邊', '套組', '委託'] as const
+export const ageRatings = ['全年齡', 'R18'] as const
 
 export const boothJsonSchema = {
   type: 'object',
@@ -51,8 +51,8 @@ export function normalizeBooth (data: Partial<BoothCatalog>, boothId: string, so
 }
 
 function normalizeItem (item: Partial<BoothItem>): BoothItem {
-  const itemType = itemTypes.includes(item.item_type as never) ? item.item_type as BoothItem['item_type'] : '未知'
-  const ageRating = ageRatings.includes(item.age_rating as never) ? item.age_rating as BoothItem['age_rating'] : '未知'
+  const itemType = itemTypes.includes(item.item_type as never) ? item.item_type as BoothItem['item_type'] : itemTypes[0]
+  const ageRating = ageRatings.includes(item.age_rating as never) ? item.age_rating as BoothItem['age_rating'] : ageRatings[0]
   const price = typeof item.price_twd === 'number' && Number.isFinite(item.price_twd) ? Math.trunc(item.price_twd) : null
 
   return {

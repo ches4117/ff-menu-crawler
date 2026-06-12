@@ -2,10 +2,16 @@ import { existsSync, readFileSync } from 'node:fs'
 import type { BoothCatalog, BoothItem, CostEstimate } from '../../shared/types'
 import { circleCatalogId } from './circleId'
 
-const unknownValues = new Set(['UNKNOWN', 'N/A', 'NA', '-', '?', '不明', '未知', '無法辨識'])
-const singleVariantLabels = new Set(['單款', '一款', '單入', '一入', '單張', '一張', '單個', '一個'])
-const setVariantLabels = new Set(['一組', '套組', '全套', '大全套', '組合包', '套裝', '福袋', 'SET'])
-const variantPattern = '(單款|一款|單入|一入|單張|一張|單個|一個|一組|套組|全套|大全套|組合包|套裝|福袋|SET)'
+const pricePrefix = '\u50f9\u683c\uff1a'
+const unknownValues = new Set(['UNKNOWN', 'N/A', 'NA', '-', '?', '\u4e0d\u660e', '\u672a\u77e5', '\u7121\u6cd5\u8fa8\u8b58'])
+const singleVariantLabels = ['\u55ae\u6b3e', '\u4e00\u6b3e', '\u55ae\u5165', '\u4e00\u5165', '\u55ae\u5f35', '\u4e00\u5f35', '\u55ae\u500b', '\u4e00\u500b']
+const setVariantLabels = ['\u4e00\u7d44', '\u5957\u7d44', '\u5168\u5957', '\u5927\u5168\u5957', '\u7d44\u5408\u5305', '\u5957\u88dd', '\u798f\u888b', 'SET']
+const variantLabels = [...singleVariantLabels, ...setVariantLabels]
+const variantPattern = variantLabels.map(escapeRegExp).join('|')
+const titleSuffixVariantLabels = [...singleVariantLabels, '\u4e00\u7d44', '\u5168\u5957', '\u5927\u5168\u5957']
+const titleSuffixVariantPattern = titleSuffixVariantLabels.map(escapeRegExp).join('|')
+const itemTypes: BoothItem['item_type'][] = ['新刊', '既刊', '周邊', '套組', '委託']
+const ageRatings: BoothItem['age_rating'][] = ['全年齡', 'R18']
 
 export function readBooths (path: string): BoothCatalog[] {
   if (!existsSync(path)) return []
@@ -103,6 +109,8 @@ function normalizeItem (item: BoothItem): BoothItem {
   return {
     ...item,
     title: displayItemTitle(item.title, item.title),
+    item_type: itemTypes.includes(item.item_type) ? item.item_type : itemTypes[0],
+    age_rating: ageRatings.includes(item.age_rating) ? item.age_rating : ageRatings[0],
     notes: normalizeNotes(item.notes)
   }
 }
@@ -112,10 +120,10 @@ function combineItems (left: BoothItem, right: BoothItem): BoothItem {
   return {
     ...left,
     title: displayItemTitle(left.title, right.title),
-    item_type: preferText(left.item_type, right.item_type) as BoothItem['item_type'],
+    item_type: normalizeItemType(preferText(left.item_type, right.item_type)),
     fandom: preferText(left.fandom, right.fandom),
     price_twd: mergeItemPrice(left.price_twd, right.price_twd),
-    age_rating: preferText(left.age_rating, right.age_rating) as BoothItem['age_rating'],
+    age_rating: normalizeAgeRating(preferText(left.age_rating, right.age_rating)),
     format: mergeText(left.format, right.format),
     notes: mergeNotes(left.notes, right.notes, priceNotes)
   }
@@ -134,8 +142,8 @@ function baseItemTitle (value: string) {
   return value
     .normalize('NFKC')
     .trim()
-    .replace(new RegExp(`[（(]\\s*${variantPattern}\\s*[）)]`, 'gi'), '')
-    .replace(new RegExp(`\\s*${variantPattern}$`, 'i'), '')
+    .replace(new RegExp(`[()\\uFF08\\uFF09]\\s*(?:${variantPattern})\\s*[()\\uFF08\\uFF09]`, 'gi'), '')
+    .replace(new RegExp(`\\s*(?:${titleSuffixVariantPattern})$`, 'i'), '')
     .trim()
 }
 
@@ -145,34 +153,37 @@ function mergeItemPrice (left: number | null, right: number | null) {
 }
 
 function mergePriceNotes (left: BoothItem, right: BoothItem) {
-  const options = [priceOption(left), priceOption(right), ...extractPriceOptions(left.notes), ...extractPriceOptions(right.notes)]
-    .map(normalizePriceOption)
-    .filter(Boolean)
+  const options = [
+    priceOption(left),
+    priceOption(right),
+    ...extractPriceOptions(left.notes),
+    ...extractPriceOptions(right.notes)
+  ].map(normalizePriceOption).filter(Boolean)
   const unique = [...new Set(options)]
-  return unique.length > 1 ? `價格：${unique.join('；')}` : unique[0] ? `價格：${unique[0]}` : ''
+  return unique.length > 1 ? `${pricePrefix}${unique.join('\uff1b')}` : ''
 }
 
 function priceOption (item: BoothItem) {
-  if (item.price_twd === null) return ''
+  if (item.price_twd === null || item.price_twd === undefined) return ''
   const label = itemVariantLabel(item.title)
   return `${label ? `${label} ` : ''}${item.price_twd}`
 }
 
 function itemVariantLabel (title: string) {
   const text = title.normalize('NFKC').trim()
-  const bracket = text.match(new RegExp(`[（(]\\s*${variantPattern}\\s*[）)]`, 'i'))
+  const bracket = text.match(new RegExp(`[()\\uFF08\\uFF09]\\s*(${variantPattern})\\s*[()\\uFF08\\uFF09]`, 'i'))
   if (bracket?.[1]) return normalizeVariantLabel(bracket[1])
 
-  const suffix = text.match(new RegExp(`${variantPattern}$`, 'i'))
+  const suffix = text.match(new RegExp(`(${variantPattern})$`, 'i'))
   return suffix?.[1] ? normalizeVariantLabel(suffix[1]) : ''
 }
 
 function normalizeVariantLabel (value: string) {
   const text = value.normalize('NFKC').trim()
   const upper = text.toUpperCase()
-  if (singleVariantLabels.has(text)) return '單款'
-  if (upper === 'SET') return '套組'
-  return setVariantLabels.has(text) ? text : text
+  if (singleVariantLabels.includes(text)) return '\u55ae\u6b3e'
+  if (upper === 'SET') return '\u5957\u7d44'
+  return text
 }
 
 function mergeNotes (...values: string[]) {
@@ -181,6 +192,7 @@ function mergeNotes (...values: string[]) {
 
   for (const value of values) {
     for (const part of splitNoteParts(value)) {
+      if (isInvalidPriceNote(part) || isEmptyPriceLikePart(part)) continue
       const extracted = extractPriceOptions(part)
       if (extracted.length) {
         priceOptions.push(...extracted)
@@ -191,8 +203,10 @@ function mergeNotes (...values: string[]) {
   }
 
   const normalizedPriceOptions = [...new Set(priceOptions.map(normalizePriceOption).filter(Boolean))]
-  const priceNote = normalizedPriceOptions.length ? `價格：${normalizedPriceOptions.join('；')}` : ''
-  return mergeText(...[...normalNotes, priceNote])
+  const displayPriceOptions = inferSingleVariantOption(normalizedPriceOptions)
+  const priceNote = displayPriceOptions.length > 1 ? `${pricePrefix}${displayPriceOptions.join('\uff1b')}` : ''
+  const mergedNormalNotes = mergeText(...normalNotes)
+  return [mergedNormalNotes, priceNote].filter(Boolean).join(';')
 }
 
 function normalizeNotes (value: string) {
@@ -200,31 +214,64 @@ function normalizeNotes (value: string) {
 }
 
 function extractPriceOptions (value: string) {
-  const text = value.normalize('NFKC').replace(/NTD|TWD|元/g, '').trim()
+  const text = normalizePriceText(value)
   const withoutPrefix = text.replace(/^價格[:：]\s*/i, '')
   if (!/\d/.test(withoutPrefix)) return []
 
   const parts = withoutPrefix
     .split(/[;；,，、]/)
     .map(part => part.trim())
-    .filter(Boolean)
+    .filter(part => part && !/undefined|null/i.test(part))
 
   if (!parts.length) return []
-  const options = parts.filter(part => /^\D{0,8}\s*\d+$/.test(part) || new RegExp(`^${variantPattern}\\s*\\d+$`, 'i').test(part))
-  return options.length ? options : []
+  return parts.filter(part => /^\D{0,8}\s*\d+$/.test(part) || new RegExp(`^(?:${variantPattern})\\s*\\d+$`, 'i').test(part))
 }
 
 function normalizePriceOption (value: string) {
-  const text = value.normalize('NFKC').replace(/^價格[:：]\s*/i, '').replace(/NTD|TWD|元/g, '').trim()
+  const text = normalizePriceText(value).replace(/^價格[:：]\s*/i, '').trim()
+  if (!text || /undefined|null/i.test(text)) return ''
+
   const match = text.match(new RegExp(`^(${variantPattern})?\\s*(\\d+)$`, 'i'))
   if (!match) return text
   const label = match[1] ? normalizeVariantLabel(match[1]) : ''
   return `${label ? `${label} ` : ''}${match[2]}`
 }
 
+function inferSingleVariantOption (options: string[]) {
+  const hasLabeledOption = options.some(option => !/^\d+$/.test(option))
+  if (!hasLabeledOption) return options
+  return options.map(option => (/^\d+$/.test(option) ? `\u55ae\u6b3e ${option}` : option))
+}
+
+function normalizePriceText (value: string) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/NTD|TWD|元/gi, '')
+    .trim()
+}
+
+function isInvalidPriceNote (value: string) {
+  return /undefined|null/i.test(value) || /^價格[:：]\s*$/i.test(value.normalize('NFKC').trim())
+}
+
+function isEmptyPriceLikePart (value: string) {
+  const text = normalizePriceText(value).replace(/^價格[:：]\s*/i, '').trim()
+  if (/\d/.test(text)) return false
+  const variantOnly = new RegExp(`^(?:${variantPattern})(?:\\s+(?:${variantPattern}))*$`, 'i')
+  return /^價格[:：]/i.test(value.normalize('NFKC').trim()) || variantOnly.test(text)
+}
+
 function preferText (left: string, right: string) {
   if (hasUsefulText(left)) return left
   return right
+}
+
+function normalizeItemType (value: string): BoothItem['item_type'] {
+  return itemTypes.includes(value as BoothItem['item_type']) ? value as BoothItem['item_type'] : itemTypes[0]
+}
+
+function normalizeAgeRating (value: string): BoothItem['age_rating'] {
+  return ageRatings.includes(value as BoothItem['age_rating']) ? value as BoothItem['age_rating'] : ageRatings[0]
 }
 
 function hasUsefulText (value: string) {
@@ -273,9 +320,13 @@ function mergeText (...values: string[]) {
 
 function splitNoteParts (value: string) {
   return String(value || '')
-    .split(';')
+    .split(/[;；]/)
     .map(part => part.trim())
     .filter(Boolean)
+}
+
+function escapeRegExp (value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function round (value: number) {

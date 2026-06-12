@@ -54,28 +54,30 @@ export default defineEventHandler(async (event) => {
   const parsedByBooth = new Map<string, BoothCatalog>()
   const finalPathsByBooth = new Map<string, string[]>()
 
-  for (const [index, path] of saved.entries()) {
-    const fallbackBoothId = `${uploadId}_${index + 1}`
-    const tempSourcePath = relative(process.cwd(), path)
-    const parsed = await parseImagesWithGemini([path], fallbackBoothId, tempSourcePath, apiKey, model)
-    const boothId = circleCatalogId(parsed.circle_name, parsed.booth_id || fallbackBoothId) || fallbackBoothId
-    parsed.booth_id = boothId
+  try {
+    for (const [index, path] of saved.entries()) {
+      const fallbackBoothId = `${uploadId}_${index + 1}`
+      const tempSourcePath = relative(process.cwd(), path)
+      const parsed = await parseImagesWithGemini([path], fallbackBoothId, tempSourcePath, apiKey, model)
+      const boothId = circleCatalogId(parsed.circle_name, parsed.booth_id || fallbackBoothId) || fallbackBoothId
+      parsed.booth_id = boothId
 
-    const boothDir = join(inputDir, safeStorageId(boothId))
-    mkdirSync(boothDir, { recursive: true })
+      const boothDir = join(inputDir, safeStorageId(boothId))
+      mkdirSync(boothDir, { recursive: true })
 
-    const finalPath = join(boothDir, `${Date.now()}-${index + 1}${extname(path).toLowerCase()}`)
-    renameSync(path, finalPath)
+      const finalPath = join(boothDir, `${Date.now()}-${index + 1}${extname(path).toLowerCase()}`)
+      renameSync(path, finalPath)
 
-    const relativeFinalPath = relative(process.cwd(), finalPath)
-    parsed.source_path = relativeFinalPath
-    finalPathsByBooth.set(boothId, [...(finalPathsByBooth.get(boothId) || []), relativeFinalPath])
+      const relativeFinalPath = relative(process.cwd(), finalPath)
+      parsed.source_path = relativeFinalPath
+      finalPathsByBooth.set(boothId, [...(finalPathsByBooth.get(boothId) || []), relativeFinalPath])
 
-    const current = parsedByBooth.get(boothId)
-    parsedByBooth.set(boothId, current ? combineBooths(current, parsed) : parsed)
+      const current = parsedByBooth.get(boothId)
+      parsedByBooth.set(boothId, current ? combineBooths(current, parsed) : parsed)
+    }
+  } finally {
+    cleanupPendingDir(tempDir)
   }
-
-  cleanupPendingDir(tempDir)
 
   const parsedBooths = [...parsedByBooth.values()].map(booth => ({
     ...booth,

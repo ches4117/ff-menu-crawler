@@ -1,5 +1,5 @@
-export type ItemType = '新刊' | '既刊' | '周邊' | '套組' | '委託' | '未知'
-export type AgeRating = '全年齡' | 'R18' | '未知'
+export type ItemType = '新刊' | '既刊' | '周邊' | '套組' | '委託'
+export type AgeRating = '全年齡' | 'R18'
 
 export interface BoothItem {
   title: string

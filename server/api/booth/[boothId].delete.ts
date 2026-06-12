@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path'
 import type { BoothCatalog } from '../../../shared/types'
 import { readBooths } from '../../utils/catalog'
 import { circleCatalogId, safeStorageId } from '../../utils/circleId'
-import { inputDir, outputCsvPath, outputJsonPath, reviewedCsvPath, reviewedJsonPath } from '../../utils/paths'
+import { inputDir, isInsideDir, outputCsvPath, outputJsonPath, reviewedCsvPath, reviewedJsonPath } from '../../utils/paths'
 import { writeOutputs } from '../../utils/exporter'
 
 export default defineEventHandler((event) => {
@@ -53,7 +53,7 @@ function removeSourceDirs (booths: BoothCatalog[]) {
 
 function removeInsideInputDir (target: string) {
   const inputRoot = resolve(inputDir)
-  if (target.startsWith(inputRoot) && target !== inputRoot && existsSync(target)) {
+  if (isInsideDir(inputRoot, target) && resolve(target) !== inputRoot && existsSync(target)) {
     rmSync(target, { recursive: true, force: true })
   }
 }

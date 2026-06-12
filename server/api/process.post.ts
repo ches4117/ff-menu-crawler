@@ -5,6 +5,8 @@ import { inputDir, outputCsvPath, outputJsonPath } from '../utils/paths'
 import { parseImagesWithGemini } from '../utils/gemini'
 import { writeOutputs } from '../utils/exporter'
 import { findBoothImages } from '../utils/images'
+import { mergeBooth } from '../utils/catalog'
+import type { BoothCatalog } from '../../shared/types'
 
 export default defineEventHandler(async () => {
   loadDotEnv()
@@ -19,7 +21,7 @@ export default defineEventHandler(async () => {
   }
 
   const boothDirs = readdirSync(inputDir, { withFileTypes: true }).filter(entry => entry.isDirectory())
-  const booths = []
+  let booths: BoothCatalog[] = []
 
   for (const boothDir of boothDirs) {
     const absoluteDir = join(inputDir, boothDir.name)
@@ -29,7 +31,7 @@ export default defineEventHandler(async () => {
 
     const sourcePath = imagePaths.map(path => relative(process.cwd(), path)).join(';')
     const booth = await parseImagesWithGemini(imagePaths, boothDir.name, sourcePath, apiKey, model)
-    booths.push(booth)
+    booths = mergeBooth(booths, booth)
   }
 
   mkdirSync(dirname(outputJsonPath), { recursive: true })

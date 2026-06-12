@@ -6,7 +6,8 @@
     "dev": "nuxt dev --host 127.0.0.1 --port 4177",
     "build": "nuxt build",
     "start": "node .output/server/index.mjs",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "test": "npm run build && node --test tests/catalog-regression.mjs"
   },
   "dependencies": {
     "@nuxt/schema": "^4.1.3",

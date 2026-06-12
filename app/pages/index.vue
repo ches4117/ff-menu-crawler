@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { BoothCatalog, BoothItem } from '~/shared/types'
 
-const itemTypes = ['新刊', '既刊', '周邊', '套組', '委託', '未知']
-const ageRatings = ['全年齡', 'R18', '未知']
+const itemTypes = ['新刊', '既刊', '周邊', '套組', '委託']
+const ageRatings = ['全年齡', 'R18']
 
 const booths = ref<BoothCatalog[]>([])
 const active = ref(0)
@@ -11,6 +11,7 @@ const savePending = ref(false)
 const uploadPending = ref(false)
 const uploadInput = ref<HTMLInputElement | null>(null)
 const removePending = ref(false)
+const editorPane = ref<HTMLElement | null>(null)
 const status = ref('載入中...')
 const statusKind = ref('')
 
@@ -118,17 +119,19 @@ async function removeActiveBooth () {
   }
 }
 
-function addItem () {
+async function addItem () {
   if (!activeBooth.value) return
   activeBooth.value.items.push({
-    title: '未知',
-    item_type: '未知',
-    fandom: '未知',
+    title: '',
+    item_type: itemTypes[0] as BoothItem['item_type'],
+    fandom: '',
     price_twd: null,
-    age_rating: '未知',
-    format: '未知',
+    age_rating: ageRatings[0] as BoothItem['age_rating'],
+    format: '',
     notes: ''
   })
+  await nextTick()
+  editorPane.value?.scrollTo({ top: editorPane.value.scrollHeight, behavior: 'smooth' })
 }
 
 function removeItem (index: number) {
@@ -194,7 +197,7 @@ function updateItemPrice (item: BoothItem, value: string) {
         <img v-for="path in sourceImages" :key="path" class="source-image" :src="imageUrl(path)" :alt="path">
       </section>
 
-      <section v-if="activeBooth" class="editor-pane">
+      <section v-if="activeBooth" ref="editorPane" class="editor-pane">
         <div class="panel">
           <div class="panel-title">攤位資料</div>
           <div class="panel-actions">
